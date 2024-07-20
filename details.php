@@ -6,13 +6,21 @@ if (isset($_POST['delete'])) {
     $id_to_delete = mysqli_real_escape_string($connection, $_POST['id_to_delete']);
 
     $sql = "DELETE FROM pizzas WHERE id=$id_to_delete";
+    $stmt = $connection->prepare("DELETE FROM pizzas WHERE id = ?");
+    if ($stmt) {
+        $stmt->bind_param("i", $id_to_delete);
+        if ($stmt->execute()) {
+            // Success
+            header("Location: index.php");
+        } else {
+            // Failure
+            echo "Query error: " . $stmt->error;
+        }
 
-    if (mysqli_query($connection, $sql)) {
-        //success
-        header("Location: index.php");
+        $stmt->close();
     } else {
-        //failure
-        echo "query error: " . mysqli_error($connection);
+        // Failure to prepare the statement
+        echo "Query error: " . $connection->error;
     }
 }
 
